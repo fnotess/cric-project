@@ -1,0 +1,36 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+# Replace this with the URL of the page you want to scrape
+url = "https://www.espncricinfo.com/series/benson-hedges-world-series-cup-1979-80-60807/australia-vs-england-10th-match-65295/full-scorecard"
+
+# Send an HTTP GET request to the URL
+response = requests.get(url)
+
+# Check if the request was successful
+if response.status_code == 200:
+    # Parse the HTML content of the page
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+
+    # Find all elements with the specified class that contains player names
+    player_name_elements = soup.find_all('span', class_='ds-text-tight-s ds-font-medium ds-text-typo ds-underline ds-decoration-ui-stroke hover:ds-text-typo-primary hover:ds-decoration-ui-stroke-primary ds-block ds-cursor-pointer')
+
+    # Extract player names and their respective countries
+    player_data = []
+
+    for player_element in player_name_elements:
+        player_name = player_element.text.strip()
+        # Find the nearest country name for the player
+        country = player_element.find_previous('span', class_='ds-text-title-xs ds-font-bold ds-capitalize').text.strip()
+        player_data.append({'Player Name': player_name, 'Country': country})
+
+    # Create a DataFrame from the player data
+    df = pd.DataFrame(player_data)
+
+    # Print the DataFrame
+    print(df)
+
+else:
+    print(f"Failed to retrieve the page. Status code: {response.status_code}")
